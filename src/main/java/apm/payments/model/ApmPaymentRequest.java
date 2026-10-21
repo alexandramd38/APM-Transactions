@@ -1,6 +1,10 @@
 package apm.payments.model;
 
+import apm.payments.validation.SupportedByPaymentMethod;
+import apm.payments.validation.ValidCountryCode;
+import apm.payments.validation.ValidCurrency;
 import java.math.BigDecimal;
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
@@ -8,33 +12,37 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+@SupportedByPaymentMethod
 public class ApmPaymentRequest {
+
+  private static final String IDENTIFIER_REGEXP = "^[A-Za-z0-9_-]*$";
+  private static final String IDENTIFIER_MESSAGE = "must contain only letters, digits, '-' and '_'";
 
   @NotBlank
   @Size(max = 50)
+  @Pattern(regexp = IDENTIFIER_REGEXP, message = IDENTIFIER_MESSAGE)
   private String merchantId;
 
   @NotBlank
   @Size(max = 50)
+  @Pattern(regexp = IDENTIFIER_REGEXP, message = IDENTIFIER_MESSAGE)
   private String orderReference;
 
   @NotNull
-  @DecimalMin(value = "0.01")
-  @Digits(integer = 15, fraction = 2)
+  @DecimalMin(value = "0.01", message = "must be at least 0.01")
+  @DecimalMax(value = "100000.00", message = "must not exceed 100000.00")
+  @Digits(integer = 6, fraction = 2, message = "must have at most 2 decimal places")
   private BigDecimal amount;
 
-  @NotBlank
-  @Pattern(regexp = "^[A-Z]{3}$", message = "must be an ISO 4217 currency code")
-  private String currency;
+  @NotBlank @ValidCurrency private String currency;
 
   @NotNull private PaymentMethod paymentMethod;
 
-  @NotBlank
-  @Pattern(regexp = "^[A-Z]{2}$", message = "must be an ISO 3166-1 alpha-2 country code")
-  private String countryCode;
+  @NotBlank @ValidCountryCode private String countryCode;
 
   @NotBlank
-  @Pattern(regexp = "^https?://.+", message = "must be a valid http(s) URL")
+  @Size(max = 2048)
+  @Pattern(regexp = "^https?://[^\\s/$.?#][^\\s]*$", message = "must be a valid http(s) URL")
   private String returnUrl;
 
   public String getMerchantId() {
