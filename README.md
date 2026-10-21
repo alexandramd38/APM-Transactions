@@ -131,3 +131,9 @@ curl -i -X POST $URL -H 'Content-Type: text/plain' -d 'hello'
 # 13. Wrong HTTP method -> 405 / 4050
 curl -i -X GET $URL
 ```
+
+## Mock Splunk
+
+`tools/mock-splunk/` contains a fake Splunk MCP connector that answers Splunk searches from these
+logs, so Devin (including Devin Oncall) can investigate them without a real Splunk instance. See
+[tools/mock-splunk/README.md](tools/mock-splunk/README.md).
