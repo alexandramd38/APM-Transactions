@@ -71,6 +71,11 @@ python3 mock_splunk_mcp.py --alerts
    > [Splunk alert] APM-Payments rejected requests: 13 requests rejected in the last 15 minutes
    > (search: `index=apm event_type=request_rejected`). Please investigate.
 
+## APM-Support alert triage
+
+[../apm-support-triage/SKILL.md](../apm-support-triage/SKILL.md) is an Agent Skill that scans the
+`apm-support` Slack channel for alerts and investigates each one with this MCP server.
+
 ## Generate new sample logs
 
 Start APM-Payments, run the curl commands from the root README's "Negative test scenarios"

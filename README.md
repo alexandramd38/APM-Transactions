@@ -137,3 +137,9 @@ curl -i -X GET $URL
 `tools/mock-splunk/` contains a fake Splunk MCP connector that answers Splunk searches from these
 logs, so Devin (including Devin Oncall) can investigate them without a real Splunk instance. See
 [tools/mock-splunk/README.md](tools/mock-splunk/README.md).
+
+## APM-Support alert triage
+
+`tools/apm-support-triage/SKILL.md` is an Agent Skill that scans the `apm-support` Slack channel
+for alerts and investigates each one in these logs via the Mock Splunk MCP. See
+[tools/apm-support-triage/SKILL.md](tools/apm-support-triage/SKILL.md).
