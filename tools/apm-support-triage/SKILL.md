@@ -15,10 +15,11 @@ APM-Payments logs through the Mock Splunk MCP server.
 ## Prerequisites
 
 - **Slack connector** (required; there is no Slack integration in this repo): any
-  Slack MCP server or Slack API tool that can read channel history, e.g. the Slack
-  MCP from the Devin marketplace. It must have **read access to the `apm-support`
-  channel** (`conversations.history`, and `chat.postMessage` only if you will post
-  replies). If no Slack connector is available, stop and ask the user to connect
+  Slack MCP server or Slack API tool that can read channel history **and post
+  replies**, e.g. the Slack MCP from the Devin marketplace. It must have **read and
+  write access to the `apm-support` channel** (`conversations.history` plus
+  `chat.postMessage` for the summary reply). If no Slack connector is available,
+  stop and ask the user to connect
   one — do not fabricate channel contents.
 - **Mock Splunk MCP** connected per
   [../mock-splunk/README.md](../mock-splunk/README.md) — it must expose
@@ -55,9 +56,22 @@ APM-Payments logs through the Mock Splunk MCP server.
    breakdown by `status`/`fault_code`/`field`, affected `orderReference`s (and
    `transactionId`s when present), the likely root cause from `reason` /
    `fault_message`, and whether the alert is still firing.
-6. **Optional:** post the summary back to `apm-support` as a **threaded reply**
-   to the alert message — only when the user asked for it or the workflow
-   implies it.
+6. **Include impact.** Every summary must state the blast radius, not just the
+   counts:
+   - **Scope** — how many distinct `orderReference`s / `merchantId`s /
+     `paymentMethod`s are hit vs. total traffic in the window (compare
+     `request_received`/`request_accepted` counts to rejected counts to estimate
+     the failure rate).
+   - **Who is affected** — one merchant/order vs. many (e.g. a single client
+     hammering the endpoint vs. broad organic failures).
+   - **User-facing effect** — e.g. payments rejected at checkout, retries
+     amplifying volume, or only test traffic.
+   - **Severity call** — whether it looks like organic production failures or
+     scripted/test traffic (all failure modes at once on one `orderReference`
+     usually means the negative test scenarios were run).
+7. **Always post the summary.** Post it back to `apm-support` as a **threaded
+   reply** to the alert message — every time, not only on request. Keep it
+   compact: trigger, counts/breakdown, impact, root cause, still-firing verdict.
 
 ## Example SPL
 
