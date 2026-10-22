@@ -27,13 +27,14 @@ APM-Payments logs through the Mock Splunk MCP server.
   [../mock-splunk/README.md](../mock-splunk/README.md) — it must expose
   `splunk_search`, `splunk_list_indexes`, `splunk_get_field_summary` and
   `splunk_list_alerts` over `index=apm`.
-- **xMatters escalation target** (optional; there is no xMatters
-  connector/API in this repo): an xMatters MCP/API connector that can send a
-  notification to the on-call group when triage concludes that manual
-  intervention is needed. If no xMatters connector is available, the agent
-  must instead surface the escalation in its Slack summary — clearly flagging
-  that human/on-call intervention is required and linking the xMatters
-  runbook:
+- **xMatters webhook** (required for escalation): the `XMATTERS_WEBHOOK_URL`
+  environment variable — an org secret holding the xMatters inbound
+  integration webhook. Send notifications with a plain HTTPS `POST` of JSON
+  to it (e.g. `curl -X POST "$XMATTERS_WEBHOOK_URL" -H 'Content-Type: application/json' -d @payload.json`).
+  Never print or log the URL. If the variable is unset or the POST fails, the
+  agent must instead surface the escalation in its Slack summary — clearly
+  flagging that human/on-call intervention is required and linking the
+  xMatters runbook:
   https://apm.gh.worldpay.io/operations/monitoring/xmatters/groups_and_rotas#override-rota-for-a-specific-period-of-time
   — and must **not** fabricate that an xMatters notification was sent.
 
@@ -111,10 +112,12 @@ APM-Payments logs through the Mock Splunk MCP server.
    merchant-integration issue vs. a platform issue, severity, and a link to
    the xMatters runbook for overriding the on-call rota if needed:
    https://apm.gh.worldpay.io/operations/monitoring/xmatters/groups_and_rotas#override-rota-for-a-specific-period-of-time
-   Send it via the xMatters connector when one is available. If none is
-   available, clearly flag in the Slack summary that human/on-call
-   escalation is required and include the runbook link — never silently skip
-   the escalation and never claim a notification was sent when it was not.
+   Send it with `curl -X POST "$XMATTERS_WEBHOOK_URL" -H 'Content-Type: application/json'`
+   and a JSON body like `{"alert": "<title>", "summary": "<findings>", "impact": "<impact>", "recommendation": "<action>", "severity": "<high|medium|low>"}`.
+   If the variable is unset or the POST fails, clearly flag in the Slack
+   summary that human/on-call escalation is required and include the runbook
+   link — never silently skip the escalation and never claim a notification
+   was sent when it was not.
 
 ## Example SPL
 
